@@ -175,15 +175,18 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
     def _update_target_network(self):
         ptu.soft_update_from_to(self.vf, self.target_vf, self.soft_target_tau)
 
-    def _take_step(self, indices, context):
+    def _take_step(self, index, context):
 
-        num_tasks = len(indices)
+        num_tasks = len([index])
+
+        one_hot_task_id = np.zeros(self.num_tasks)
+        one_hot_task_id[index] = 1
 
         # data is (task, batch, feat)
-        obs, actions, rewards, next_obs, terms = self.sample_sac(indices)
+        obs, actions, rewards, next_obs, terms = self.sample_sac([index])
 
         # run inference in networks
-        policy_outputs, task_z = self.agent(obs, context)
+        policy_outputs, task_z = self.agent(obs, context, one_hot_task_id)
         new_actions, policy_mean, policy_log_std, log_pi = policy_outputs[:4]
 
         # flattens out the task dimension
@@ -194,8 +197,8 @@ class PEARLSoftActorCritic(MetaRLAlgorithm):
 
         # Q and V networks
         # encoder will only get gradients from Q nets
-        q1_pred = self.qf1(obs, actions, task_z)
-        q2_pred = self.qf2(obs, actions, task_z)
+        q1_pred = self.qf1(obs, actions, task_z.detach())
+        q2_pred = self.qf2(obs, actions, task_z.detach())
         v_pred = self.vf(obs, task_z.detach())
         # get targets for use in V and Q updates
         with torch.no_grad():
