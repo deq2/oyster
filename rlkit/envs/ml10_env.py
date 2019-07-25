@@ -1,11 +1,11 @@
 from rlkit.core.serializable import Serializable
 import gym
 import numpy as np
-from multiworld.envs.mujoco.sawyer_xyz.sawyer_reach_push_pick_place_6dof import SawyerReachPushPickPlace6DOFEnv
-from multiworld.envs.mujoco.sawyer_xyz.sawyer_reach_push_pick_place_wall_6dof import SawyerReachPushPickPlaceWall6DOFEnv
+from metaworld.envs.mujoco.sawyer_xyz.sawyer_reach_push_pick_place_6dof import SawyerReachPushPickPlace6DOFEnv
+from metaworld.envs.mujoco.sawyer_xyz.sawyer_reach_push_pick_place_wall_6dof import SawyerReachPushPickPlaceWall6DOFEnv
 
 
-class ML10Env(gym.Env, Serializable):
+class MediumEnv(gym.Env, Serializable):
     def __init__(self, task_list):
         Serializable.quick_init(self, locals())
         self._task_envs = []
@@ -86,3 +86,4 @@ class ML10Env(gym.Env, Serializable):
         self.reset()
 
     def get_all_task_idx(self):
+        return range(len(self._task_envs))

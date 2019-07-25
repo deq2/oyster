@@ -10,10 +10,8 @@ import json
 import torch
 
 from rlkit.envs import ENVS
-from rlkit.envs import ML10Env
+from rlkit.envs.ml10_env import MediumEnv
 from rlkit.envs.wrappers import NormalizedBoxEnv
-from rlkit.envs.multitask_env import MultiClassMultiTaskEnv
-from rlkit.envs.medium_mode_env_list import MEDIUM_MODE_DICT, MEDIUM_MODE_ARGS_KWARGS
 from rlkit.torch.sac.policies import TanhGaussianPolicy
 from rlkit.torch.networks import FlattenMlp, MlpEncoder, RecurrentEncoder
 from rlkit.torch.sac.sac import PEARLSoftActorCritic
@@ -21,13 +19,13 @@ from rlkit.torch.sac.agent import PEARLAgent
 from rlkit.launchers.launcher_util import setup_logger
 import rlkit.torch.pytorch_util as ptu
 from configs.default import default_config
-from multiworld.envs.mujoco.sawyer_xyz.env_lists import MEDIUM_TRAIN_AND_TEST_LIST
+from metaworld.envs.mujoco.sawyer_xyz.env_lists import MEDIUM_TRAIN_AND_TEST_LIST
 
 
 def experiment(variant):
 
     # create multi-task environment and sample tasks
-    env = ML10Env(MEDIUM_TRAIN_AND_TEST_LIST)
+    env = MediumEnv(MEDIUM_TRAIN_AND_TEST_LIST)
 
     tasks = env.get_all_task_idx()
     obs_dim = int(np.prod(env.observation_space.shape))

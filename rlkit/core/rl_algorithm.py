@@ -366,9 +366,6 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
                 sparse_rewards = np.stack(e['sparse_reward'] for e in p['env_infos']).reshape(-1, 1)
                 p['rewards'] = sparse_rewards
 
-        goal = self.env._goal
-        for path in paths:
-            path['goal'] = goal # goal
 
         # save the paths for visualization, only useful for point mass
         if self.dump_eval_paths:
@@ -381,15 +378,20 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
         online_returns = []
         for idx in indices:
             all_rets = []
+            all_success = []
             for r in range(self.num_evals):
                 paths = self.collect_paths(idx, epoch, r)
                 all_rets.append([eval_util.get_average_returns([p]) for p in paths])
+                all_success.append(eval_util.get_success_rate(paths))
+            success_rate = np.mean(all_success)
+            self.eval_statistics['Success_test_task{}'.format(self.task_idx)] = success_rate
             final_returns.append(np.mean([a[-1] for a in all_rets]))
             # record online returns for the first n trajectories
             n = min([len(a) for a in all_rets])
             all_rets = [a[:n] for a in all_rets]
             all_rets = np.mean(np.stack(all_rets), axis=0) # avg return per nth rollout
             online_returns.append(all_rets)
+            self.eval_statistics['AverageReturn_test_task{}'.format(self.task_idx)] = all_rets
         n = min([len(t) for t in online_returns])
         online_returns = [t[:n] for t in online_returns]
         return final_returns, online_returns
@@ -427,9 +429,9 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
                                                         resample=np.inf)
                 paths += p
             average_returns = eval_util.get_average_returns(paths)
-            self.eval_statistics['AverageReturn_{}_task{}'.format(split, self.task_idx)] = average_returns
+            self.eval_statistics['AverageReturn_train_task{}'.format(self.task_idx)] = average_returns
             success_rate = eval_util.get_success_rate(paths)
-            self.eval_statistics['Success_{}_task{}'.format(split, self.task_idx)] = success_rate
+            self.eval_statistics['Success_train_task{}'.format(self.task_idx)] = success_rate
 
             if self.sparse_rewards:
                 for p in paths:
