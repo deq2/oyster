@@ -412,7 +412,8 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
 
         ### train tasks
         # eval on a subset of train tasks for speed
-        indices = np.random.choice(self.train_tasks, len(self.eval_tasks))
+        #indices = np.random.choice(self.train_tasks, len(self.eval_tasks))
+        indices = self.train_tasks
         eval_util.dprint('evaluating on {} train tasks'.format(len(indices)))
         ### eval train tasks with posterior sampled from the training replay buffer
         train_returns = []
