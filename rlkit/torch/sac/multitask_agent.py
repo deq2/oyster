@@ -40,7 +40,7 @@ def _canonical_to_natural(mu, sigma_squared):
     return n1, n2
 
 
-class PEARLAgent(nn.Module):
+class MultitaskAgent(nn.Module):
 
     def __init__(self,
                  latent_dim,
