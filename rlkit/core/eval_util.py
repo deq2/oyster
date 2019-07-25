@@ -43,6 +43,15 @@ def get_average_returns(paths):
     returns = [sum(path["rewards"]) for path in paths]
     return np.mean(returns)
 
+def get_success_rate(paths):
+    # info = np.vstack([path["env_info"] for path in paths])
+    total_successes = []
+    for path in paths:
+        infos = path["env_infos"]
+        successes = [info["success"] for info in infos]
+        total_successes.append(max(successes))
+    return np.mean(total_successes)
+
 
 def create_stats_ordered_dict(
         name,

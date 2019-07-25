@@ -426,6 +426,10 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
                                                         max_trajs=1,
                                                         resample=np.inf)
                 paths += p
+            average_returns = eval_util.get_average_returns(paths)
+            self.eval_statistics['AverageReturn_{}_task{}'.format(split, self.task_idx)] = average_returns
+            success_rate = eval_util.get_success_rate(paths)
+            self.eval_statistics['Success_{}_task{}'.format(split, self.task_idx)] = success_rate
 
             if self.sparse_rewards:
                 for p in paths:
