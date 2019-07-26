@@ -27,7 +27,7 @@ class InPlacePathSampler(object):
     def shutdown_worker(self):
         pass
 
-    def obtain_samples(self, deterministic=False, max_samples=np.inf, max_trajs=np.inf, accum_context=True, resample=1):
+    def obtain_samples(self, deterministic=False, max_samples=np.inf, max_trajs=np.inf, accum_context=True, resample=1, idx=None):
         """
         Obtains samples in the environment until either we reach either max_samples transitions or
         num_traj trajectories.
@@ -35,6 +35,7 @@ class InPlacePathSampler(object):
         """
         assert max_samples < np.inf or max_trajs < np.inf, "either max_samples or max_trajs must be finite"
         policy = MakeDeterministic(self.policy) if deterministic else self.policy
+        self.policy.set_task_idx(idx)
         paths = []
         n_steps_total = 0
         n_trajs = 0

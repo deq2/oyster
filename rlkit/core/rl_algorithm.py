@@ -137,6 +137,12 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
             idx = np.random.randint(len(self.train_tasks))
         return idx
 
+    def idx_to_onehot(self, idx):
+        num_tasks = len(self.train_tasks) + len(self.eval_tasks)
+        one_hot = np.zeros(num_tasks)
+        one_hot[idx] = 1
+        return one_hot
+
     def train(self):
         '''
         meta-training loop
@@ -161,23 +167,24 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
                 for idx in self.train_tasks:
                     self.task_idx = idx
                     self.env.reset_task(idx)
-                    self.collect_data(self.num_initial_steps, 1, np.inf)
+                    one_hot = self.idx_to_onehot(idx)
+                    self.collect_data(self.num_initial_steps, 1, np.inf, one_hot)
             # Sample data from train tasks.
             for i in range(self.num_tasks_sample):
                 idx = np.random.randint(len(self.train_tasks))
                 self.task_idx = idx
                 self.env.reset_task(idx)
                 self.enc_replay_buffer.task_buffers[idx].clear()
-
+                one_hot = self.idx_to_onehot(idx)
                 # collect some trajectories with z ~ prior
                 if self.num_steps_prior > 0:
-                    self.collect_data(self.num_steps_prior, 1, np.inf)
+                    self.collect_data(self.num_steps_prior, 1, np.inf, one_hot)
                 # collect some trajectories with z ~ posterior
                 if self.num_steps_posterior > 0:
-                    self.collect_data(self.num_steps_posterior, 1, self.update_post_train)
+                    self.collect_data(self.num_steps_posterior, 1, self.update_post_train, one_hot)
                 # even if encoder is trained only on samples from the prior, the policy needs to learn to handle z ~ posterior
                 if self.num_extra_rl_steps_posterior > 0:
-                    self.collect_data(self.num_extra_rl_steps_posterior, 1, self.update_post_train, add_to_enc_buffer=False)
+                    self.collect_data(self.num_extra_rl_steps_posterior, 1, self.update_post_train, one_hot, add_to_enc_buffer=False)
 
             # Sample train tasks and compute gradient updates on parameters.
             for train_step in range(self.num_train_steps_per_itr):
@@ -201,7 +208,7 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
         """
         pass
 
-    def collect_data(self, num_samples, resample_z_rate, update_posterior_rate, add_to_enc_buffer=True):
+    def collect_data(self, num_samples, resample_z_rate, update_posterior_rate, idx, add_to_enc_buffer=True):
         '''
         get trajectories from current env in batch mode with given policy
         collect complete trajectories until the number of collected transitions >= num_samples
@@ -220,7 +227,8 @@ class MetaRLAlgorithm(metaclass=abc.ABCMeta):
             paths, n_samples = self.sampler.obtain_samples(max_samples=num_samples - num_transitions,
                                                                 max_trajs=update_posterior_rate,
                                                                 accum_context=False,
-                                                                resample=resample_z_rate)
+                                                                resample=resample_z_rate,
+                                                                idx=idx)
             num_transitions += n_samples
             self.replay_buffer.add_paths(self.task_idx, paths)
             if add_to_enc_buffer:

@@ -64,8 +64,12 @@ class MultitaskAgent(nn.Module):
         self.register_buffer('z', torch.zeros(1, latent_dim))
         self.register_buffer('z_means', torch.zeros(1, latent_dim))
         self.register_buffer('z_vars', torch.zeros(1, latent_dim))
-
+        self.one_hot_task_id = None
         self.clear_z()
+
+    def set_task_idx(self, idx):
+        self.one_hot_task_id = idx
+        self.z = ptu.from_numpy(self.one_hot_task_id)
 
     def clear_z(self, num_tasks=1):
         '''
@@ -81,7 +85,7 @@ class MultitaskAgent(nn.Module):
         self.z_means = mu
         self.z_vars = var
         # sample a new z from the prior
-        self.sample_z()
+        #self.sample_z()
         # reset the context collected so far
         self.context = None
         # reset any hidden state in the encoder network (relevant for RNN)
@@ -143,7 +147,7 @@ class MultitaskAgent(nn.Module):
         #     self.z = torch.stack(z)
         # else:
         #     self.z = self.z_means
-        self.z = self.one_hot_task_id
+        self.z = ptu.from_numpy(self.one_hot_task_id)
 
     def get_action(self, obs, deterministic=False):
         ''' sample action from the policy, conditioned on the task embedding '''
