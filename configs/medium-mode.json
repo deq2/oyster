@@ -1,12 +1,15 @@
 {
     "env_name": "medium",
     "n_train_tasks": 10,
-    "n_eval_tasks": 5,
+    "n_eval_tasks": 0,
+    "latent_size": 10,
     "env_params": {
-        "n_tasks": 15
+        "n_tasks": 10
+
     }
     ,
     "algo_params": {
+	"use_information_bottleneck": "False",
 	"meta_batch": 40,
 	"num_tasks_sample": 10,
 	"max_path_length": 150,

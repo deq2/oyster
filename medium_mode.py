@@ -21,13 +21,13 @@ from rlkit.torch.sac.multitask_agent import MultitaskAgent
 from rlkit.launchers.launcher_util import setup_logger
 import rlkit.torch.pytorch_util as ptu
 from configs.default import default_config
-from metaworld.envs.mujoco.sawyer_xyz.env_lists import MEDIUM_TRAIN_AND_TEST_LIST
+from metaworld.envs.mujoco.sawyer_xyz.env_lists import MEDIUM_TRAIN_LIST
 
 
 def experiment(variant):
 
     # create multi-task environment and sample tasks
-    env = MediumEnv(MEDIUM_TRAIN_AND_TEST_LIST)
+    env = MediumEnv(MEDIUM_TRAIN_LIST)
 
     tasks = env.get_all_task_idx()
     obs_dim = int(np.prod(env.observation_space.shape))

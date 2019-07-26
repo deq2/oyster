@@ -69,7 +69,7 @@ class MultitaskAgent(nn.Module):
 
     def set_task_idx(self, idx):
         self.one_hot_task_id = idx
-        self.z = ptu.from_numpy(self.one_hot_task_id)
+        self.z = torch.unsqueeze(ptu.from_numpy(self.one_hot_task_id), 0)
 
     def clear_z(self, num_tasks=1):
         '''
@@ -147,12 +147,14 @@ class MultitaskAgent(nn.Module):
         #     self.z = torch.stack(z)
         # else:
         #     self.z = self.z_means
-        self.z = ptu.from_numpy(self.one_hot_task_id)
+        self.z = torch.unsqueeze(ptu.from_numpy(self.one_hot_task_id), 0)
 
     def get_action(self, obs, deterministic=False):
         ''' sample action from the policy, conditioned on the task embedding '''
         z = self.z
         obs = ptu.from_numpy(obs[None])
+        import pdb
+        pdb.set_trace()
         in_ = torch.cat([obs, z], dim=1)
         return self.policy.get_action(in_, deterministic=deterministic)
 
